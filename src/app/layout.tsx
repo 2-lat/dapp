@@ -1,7 +1,7 @@
 import "@/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Geist } from "next/font/google";
+import localFont from "next/font/local";
 
 import { TRPCReactProvider } from "@/trpc/react";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -12,23 +12,42 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist-sans",
+const cmuSerif = localFont({
+  src: [
+    {
+      path: "../fonts/cmunrm.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../fonts/cmunbx.ttf",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../fonts/cmunti.ttf",
+      weight: "400",
+      style: "italic",
+    },
+    {
+      path: "../fonts/cmunbi.ttf",
+      weight: "700",
+      style: "italic",
+    },
+  ],
+  variable: "--font-cmu-serif",
 });
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geist.variable}`} suppressHydrationWarning>
-      <body className="bg-gray-900 text-gray-50">
+    <html lang="en" className={`${cmuSerif.variable}`} suppressHydrationWarning>
+      <body className="bg-primary text-primary-foreground">
         <TRPCReactProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
+            defaultTheme="dark"
           >
             {children}
           </ThemeProvider>

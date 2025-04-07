@@ -1,18 +1,9 @@
-import Link from "next/link";
+import { AnimatedSVG } from './_components/AnimatedSVG';
 
-import { LatestPost } from "@/app/_components/post";
-import { api, HydrateClient } from "@/trpc/server";
-
-export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
-
-  void api.post.getLatest.prefetch();
-
+export default function Home() {
   return (
-    <HydrateClient>
-      <div>
-        <h1>Hello World</h1>
-      </div>
-    </HydrateClient>
+    <main className="min-h-screen">
+      <AnimatedSVG />
+    </main>
   );
 }
