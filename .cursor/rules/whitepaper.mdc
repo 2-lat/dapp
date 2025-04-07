@@ -1,0 +1,124 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{titlesec}
+
+\geometry{a4paper, margin=1in}
+\titleformat{\section}{\bfseries\Large}{\thesection}{1em}{}
+\titleformat{\subsection}{\bfseries\large}{\thesubsection}{1em}{}
+
+\title{\textbf{2.lat: Stand Strong \\ A Whitepaper}}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+\subsection{What is 2.lat}
+\textbf{2.lat} is a decentralized protocol uniting a community of web3 builders and voters. It rewards builders who create what matters—driven by market needs and their passion—whether supported or not. Through rhythmic moon cycles, the protocol fosters trust and consistency over hype.
+
+\subsection{Why We Exist}
+To empower builders who build with depth and purpose, recognized by a community that values real innovation.
+
+\section{Token Architecture}
+
+\subsection{2LAT Token}
+\begin{itemize}[leftmargin=*]
+    \item Fairlaunched on Solana via a bonding curve through pump.fun.
+    \item Total supply: 1,000,000,000 tokens, with no additional issuance.
+\end{itemize}
+
+\subsection{MOON Token}
+\begin{itemize}[leftmargin=*]
+    \item Non-transferable token issued to users per cycle payment.
+    \item Used for voting and nominating builders.
+    \item Burns at the end of each cycle if unused.
+\end{itemize}
+
+\section{Moon Cycles and Access}
+
+\subsection{Cycle Duration}
+One moon cycle = 29.5 days.
+
+\subsection{Access Payment}
+\begin{itemize}[leftmargin=*]
+    \item Users pay a fixed amount: $\text{PRICE}$ in 2LAT to access each cycle.
+    \item Payment breakdown:
+    \begin{align*}
+        \text{Locked Amount} &= 0.9 \times \text{PRICE} \quad \text{(locked for 3 cycles)} \\
+        \text{Protocol Treasury} &= 0.1 \times \text{PRICE} \quad \text{(for builder subsidies)} \\
+    \end{align*}
+    \item Users receive $M$ MOON tokens per payment for voting.
+\end{itemize}
+
+\subsection{Locking Mechanism}
+\begin{itemize}[leftmargin=*]
+    \item For each cycle $i$ paid, $L_i = 0.9 \times \text{PRICE}$ is locked for 3 cycles.
+    \item When paying for cycle $i$, $L_i-3$ (locked from cycle $i-3$) is unlocked, if exists.
+    \item If the user does not pay for cycle $i$, $\bigcup_{k = i - l}^{i - 1} L_k$ is burned at the beginning of cycle $i$.
+\end{itemize}
+This mechanism gradually reduces effective cost for consistent contributors, approaching a 90\% discount over time.
+
+\section{Builder Rewards}
+
+\subsection{Voting and Nomination}
+\begin{itemize}[leftmargin=*]
+    \item Users allocate MOON tokens to vote for or nominate builders.
+    \item MOON reflects community trust and attention.
+\end{itemize}
+
+\subsection{Subsidy Distribution}
+\begin{itemize}[leftmargin=*]
+    \item Treasury 2LAT is distributed to builders via quadratic funding based on MOON votes.
+    \item For builder $B_i$, subsidy $P_i = \dfrac{\left( \sum_{j} \sqrt{m_{i,j}} \right)^2}{\sum_k \left( \sum_{j} \sqrt{m_{k,j}} \right)^2} \cdot R$, where:
+    \begin{itemize}
+        \item $m_{i,j}$ = MOON from user $j$ to builder $B_i$.
+        \item $R$ = total subsidy pool.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Voter Rewards}
+\begin{itemize}[leftmargin=*]
+    \item Voters of rewarded builders receive a share of the subsidy, proportional to their MOON contribution.
+\end{itemize}
+
+\section{Cycle Summary}
+
+\begin{enumerate}[leftmargin=*]
+    \item User pays $\text{PRICE}$ in 2LAT.
+    \item 90\% is locked for 3 cycles, 10\% goes to treasury.
+    \item User receives $M$ MOON tokens.
+    \item User votes/nominates builders with MOON.
+    \item Builders receive 2LAT subsidies via quadratic funding.
+    \item Voters of winning builders share subsidies.
+    \item Unused MOON tokens burn at cycle’s end.
+\end{enumerate}
+
+\section{Glossary}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{2LAT} — Fairlaunched token for cycle access and subsidies.
+    \item \textbf{MOON} — Voting token, non-transferable, burns if unused.
+    \item \textbf{PRICE} — Fixed 2LAT payment per cycle.
+    \item \textbf{Treasury} — 2LAT pool for builder rewards.
+    \item \textbf{Cycle} — 29.5-day moon rhythm.
+\end{itemize}
+
+\section{Conclusion}
+
+2.lat is a protocol for builders who stand strong and a community that rewards them. It’s about rhythm, trust, and cutting through the noise—no shortcuts, just recognition.
+
+\end{document}

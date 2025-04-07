@@ -1,0 +1,25 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# PROJECT OVERVIEW
+This is a web application built with Next.js 15 that serves as a entrypoint for web3 community and community tech.
+
+
+# TECH STACK
+The project uses the following core technologies:
+Frontend:
+- Next.js 14 (React framework with App Router created with T3 create app)
+- TypeScript
+- Shadcn component framework based on Tailwind styling and Radix UI headless UI
+- Lucide Icons
+- React Query for data fetching/caching
+
+Backend: 
+- Nextjs server actions powered by tRPC transport
+- Local postgres for development need
+- Planetscale for production
+- Drizzle Kit for ORM and database difference abstraction 
+
+
