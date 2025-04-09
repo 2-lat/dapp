@@ -1,31 +1,42 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useScroll } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { ArrowDown } from "lucide-react";
+import Link from "next/link";
+import { useTheme } from "next-themes";
+import { useMounted } from "@/hooks/useMounted";
 
 type Point = [number, number];
 
-const MAX_POINTS = 96;
+const MAX_POINTS = 48;
 
-const generatePoints = (segments: number, radius: number = 200): Point[] => {
+let SEGMENTS = [];
+for (let i = MAX_POINTS; i > 1; i = Math.ceil(i / 2)) {
+  SEGMENTS.push(i);
+}
+SEGMENTS.push(1);
+SEGMENTS = SEGMENTS.reverse();
+const SEGMENTS_COUNT = SEGMENTS.length;
+
+const generatePoints = (SEGMENTS: number, radius: number = 200): Point[] => {
   const centerX = 500;
   const centerY = 500;
   const defaultPoint: Point = [centerX, centerY];
   const points: Point[] = Array(MAX_POINTS).fill(defaultPoint);
 
-  if (segments === 1) {
+  if (SEGMENTS === 1) {
     return points;
   }
 
-  if (segments === 2) {
+  if (SEGMENTS === 2) {
     // points[0] = [centerX + radius, centerY];
     for (let i = 0; i < MAX_POINTS; i++) {
       const progress = i / MAX_POINTS;
       if (progress <= 0.33) {
-        points[i] = [centerX + radius * 2, centerY];
+        points[i] = [centerX + radius * 3, centerY];
       } else {
-        points[i] = [centerX - radius * 2, centerY];
+        points[i] = [centerX - radius * 3, centerY];
       }
     }
 
@@ -33,61 +44,13 @@ const generatePoints = (segments: number, radius: number = 200): Point[] => {
   }
 
   for (let i = 0; i < MAX_POINTS; i++) {
-    const segment = Math.floor((i / MAX_POINTS) * segments);
-    const angle = (segment / segments) * Math.PI * 2;// - Math.PI / 2;
+    const segment = Math.floor((i / MAX_POINTS) * SEGMENTS);
+    const angle = (segment / SEGMENTS) * Math.PI * 2; // - Math.PI / 2;
     points[i] = [
       centerX + radius * Math.cos(angle),
       centerY + radius * Math.sin(angle),
     ];
   }
-
-  //   if (segments === 1) {
-  //     // Dot
-  //     points[0] = defaultPoint;
-  //     return points;
-  //   }
-
-  //   if (segments === 2) {
-  //     // Line
-  //     points[0] = [centerX - radius, centerY];
-  //     points[1] = [centerX + radius, centerY];
-  //     return points;
-  //   }
-
-  //   if (segments === 3) {
-  //     // Triangle
-  //     points[0] = [centerX, centerY - radius];
-  //     points[1] = [centerX + radius * Math.cos(Math.PI / 6), centerY + radius * Math.sin(Math.PI / 6)];
-  //     points[2] = [centerX - radius * Math.cos(Math.PI / 6), centerY + radius * Math.sin(Math.PI / 6)];
-  //     return points;
-  //   }
-
-  //   if (segments === 5) {
-  //     // Octagon (using 5 points for better morphing)
-  //     for (let i = 0; i < 5; i++) {
-  //       const angle = (i / 5) * Math.PI * 2;
-  //       points[i] = [centerX + radius * Math.cos(angle), centerY + radius * Math.sin(angle)];
-  //     }
-  //     return points;
-  //   }
-
-  //   if (segments === 9) {
-  //     // 9-point shape
-  //     for (let i = 0; i < 9; i++) {
-  //       const angle = (i / 9) * Math.PI * 2;
-  //       points[i] = [centerX + radius * Math.cos(angle), centerY + radius * Math.sin(angle)];
-  //     }
-  //     return points;
-  //   }
-
-  //   if (segments === MAX_POINTS) {
-  //     // MAX_POINTS-point shape
-  //     for (let i = 0; i < MAX_POINTS; i++) {
-  //       const angle = (i / MAX_POINTS) * Math.PI * 2;
-  //       points[i] = [centerX + radius * Math.cos(angle), centerY + radius * Math.sin(angle)];
-  //     }
-  //     return points;
-  //   }
 
   return points;
 };
@@ -121,23 +84,70 @@ const pointsToPath = (points: Point[]): string => {
 };
 
 export const AnimatedSVG = () => {
+  const isMounted = useMounted();
+  const { resolvedTheme: theme } = useTheme();
+
+  const isWhite = theme === "light";
+
   const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
+  const { scrollY, scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
-  let segments = [];
-  for (let i = MAX_POINTS; i > 1; i = Math.ceil(i / 2)) {
-    segments.push(i);
-  }
-  segments.push(1);
-  segments = segments.reverse();
-  const segmentsCount = segments.length;
+  const reverseScrollY = useTransform(scrollY, (y) => -y);
 
-  const allPoints = segments.map((s) => generatePoints(s));
+  const onStage = (stage: number) => {
+    return stage / SEGMENTS_COUNT;
+  };
+
+  const fadeQuetly = useTransform(
+    scrollYProgress,
+    [onStage(0), onStage(0.5)],
+    [1, 0],
+    { clamp: true },
+  );
+  const fadeBelowTheNoise = useTransform(
+    scrollYProgress,
+    [onStage(0.5), onStage(1), onStage(1.5)],
+    [0, 1, 0],
+    { clamp: true },
+  );
+  const fadeShapeForms = useTransform(
+    scrollYProgress,
+    [onStage(2), onStage(2.5), onStage(4), onStage(4.5)],
+    [0, 1, 1, 0],
+    { clamp: true },
+  );
+
+  const fadeStand = useTransform(
+    scrollYProgress,
+    [onStage(4.5), onStage(6)],
+    [0, 1],
+    { clamp: true },
+  );
+  const starsScale = useTransform(
+    scrollYProgress,
+    [onStage(0), onStage(6)],
+    [0, 1],
+    { clamp: true },
+  );
+  const starsOpacity = useTransform(
+    scrollYProgress,
+    [onStage(0), onStage(6)],
+    [0, 1],
+    { clamp: true },
+  );
+
+  const allPoints = SEGMENTS.map((s) => generatePoints(s));
   const defaultPoints = generatePoints(1);
-  const [currentPath, setCurrentPath] = useState(() =>
+  const [currentPathRed, setCurrentPathRed] = useState(() =>
+    pointsToPath(defaultPoints),
+  );
+  const [currentPathGreen, setCurrentPathGreen] = useState(() =>
+    pointsToPath(defaultPoints),
+  );
+  const [currentPathBlue, setCurrentPathBlue] = useState(() =>
     pointsToPath(defaultPoints),
   );
 
@@ -145,88 +155,204 @@ export const AnimatedSVG = () => {
 
   useEffect(() => {
     const unsubscribe = scrollYProgress.on("change", (latest: number) => {
-      const stage = Math.min(Math.floor(latest * segmentsCount), segmentsCount - 1);
-      const progress = latest * segmentsCount - stage;
+      const stage = Math.min(
+        Math.floor(latest * SEGMENTS_COUNT),
+        SEGMENTS_COUNT - 1,
+      );
+      const progress = latest * SEGMENTS_COUNT - stage;
       const currentPoints = allPoints[stage] || defaultPoints;
       const nextPoints =
         allPoints[Math.min(stage + 1, allPoints.length - 1)] || defaultPoints;
-      const interpolatedPoints = interpolatePoints(
-        currentPoints,
-        nextPoints,
-        progress,
+      setPoints(interpolatePoints(currentPoints, nextPoints, progress));
+      setCurrentPathRed(
+        pointsToPath(
+          interpolatePoints(currentPoints, nextPoints, Math.pow(progress, stage === 1 ? 1 : 0.5)),
+        ),
       );
-      setPoints(interpolatedPoints);
-      setCurrentPath(pointsToPath(interpolatedPoints));
+      setCurrentPathGreen(
+        pointsToPath(interpolatePoints(currentPoints, nextPoints, progress)),
+      );
+      setCurrentPathBlue(
+        pointsToPath(
+          interpolatePoints(currentPoints, nextPoints, Math.pow(progress, stage === 1 ? 1 : 1.5)),
+        ),
+      );
     });
-
     return () => unsubscribe();
   }, [scrollYProgress, allPoints]);
 
+  if (!isMounted) return null;
   return (
-    <div ref={containerRef} className="relative h-[400vh] w-full">
+    <div ref={containerRef} className="relative w-full">
+      {!isWhite && (
+        <motion.div
+          className="fixed top-1/2 left-1/2 size-0"
+          style={{
+            opacity: starsOpacity,
+            scale: starsScale,
+          }}
+        >
+          <motion.div
+            className="stars-1"
+            style={{
+              scale: starsScale,
+            }}
+          ></motion.div>
+          <motion.div
+            className="stars-2"
+            style={{
+              scale: starsScale,
+            }}
+          ></motion.div>
+          <motion.div
+            className="stars-3"
+            style={{
+              scale: starsScale,
+            }}
+          ></motion.div>
+          <motion.div
+            className="stars-4"
+            style={{
+              scale: starsScale,
+            }}
+          ></motion.div>
+          <motion.div
+            className="stars-5"
+            style={{
+              scale: starsScale,
+            }}
+          ></motion.div>
+        </motion.div>
+      )}
+      <div className="text-foreground fixed top-0 z-10 mx-auto flex w-full flex-row items-center justify-center py-4">
+        <div className="text-3xl">
+          <span className="relative">
+            o
+            <span className="absolute left-1/2 -translate-x-1/2 translate-y-[0.04em] pr-[0.12em]">
+              |
+            </span>
+            <span className="absolute left-1/2 -translate-x-1/2 translate-y-[0.04em] pl-[0.12em]">
+              |
+            </span>
+          </span>
+        </div>
+      </div>
       <motion.svg
         width="100%"
         height="100%"
         viewBox="0 0 1000 1000"
-        className="sticky top-0 h-screen w-full"
+        className="fixed top-0 h-screen w-full"
       >
-        <motion.path
-          d={currentPath}
-          fill="currentColor"
-          stroke="currentColor"
-          strokeWidth="2"
-          className="text-foreground"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 0.5 }}
-        />
-        {points.map((p, i) => (
-          <g key={i} opacity={0.5}>
-            <circle key={i} cx={p[0]} cy={p[1]} r="10" fill="red" />
-            <text
-              x={p[0]}
-              y={p[1]}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fill="white"
-            >
-              {i}
-            </text>
-          </g>
-        ))}
+        {isWhite ? (
+          <motion.path
+            d={currentPathGreen}
+            fill="transparent"
+            stroke="currentColor"
+            strokeWidth="1"
+            className={`text-foreground`}
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 0.5 }}
+          />
+        ) : (
+          [
+            { blur: "blur-lg", thickness: "3" },
+            { blur: "blur-xs", thickness: "2" },
+            { blur: "blur-none", thickness: "1" },
+          ].map(({ blur, thickness }) =>
+            [
+              { path: currentPathRed, color: "text-red-500" },
+              { path: currentPathGreen, color: "text-green-500" },
+              { path: currentPathBlue, color: "text-blue-500" },
+            ].map(({ path, color }) => (
+              <motion.path
+                key={`${blur}-${color}`}
+                d={path}
+                fill="transparent"
+                stroke="currentColor"
+                strokeWidth={thickness}
+                className={`${color} mix-blend-screen ${blur}`}
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.5 }}
+              />
+            )),
+          )
+        )}
+        {false &&
+          points.map((p, i) => (
+            <g key={i}>
+              <circle key={i} cx={p[0]} cy={p[1]} r="10" fill="red" />
+              <text
+                x={p[0]}
+                y={p[1]}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fill="white"
+              >
+                {i}
+              </text>
+            </g>
+          ))}
       </motion.svg>
 
       {/* Text content */}
-      <div className="absolute top-0 z-10 w-full text-center">
+      <div className="fixed bottom-10 z-10 w-full text-center">
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: scrollYProgress.get() < 0.2 ? 1 : 0 }}
-          className="mb-4 text-4xl font-bold"
+          style={{ y: reverseScrollY, opacity: fadeQuetly }}
+          className="text-muted-foreground flex flex-col items-center gap-y-2 text-lg"
         >
-          Enter quietly
+          <span>enter quietly</span>
+          <span className="animate-bounce">↓</span>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{
-            opacity:
-              scrollYProgress.get() >= 0.2 && scrollYProgress.get() < 0.4
-                ? 1
-                : 0,
-          }}
-          className="text-muted-foreground text-2xl"
-        >
-          below the noise
-        </motion.div>
+        <div className="fixed top-1/2 w-full pt-10 text-center">
+          <motion.div
+            style={{
+              opacity: fadeBelowTheNoise,
+            }}
+            className="text-muted-foreground text-2xl"
+          >
+            below the noise
+          </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: scrollYProgress.get() < 0.2 ? 1 : 0 }}
-          className="mt-8"
-        >
-          <ArrowDown className="mx-auto h-8 w-8 animate-bounce" />
-        </motion.div>
+        <div className="fixed top-1/2 w-full -translate-y-1/2 text-center">
+          <motion.div
+            style={{
+              opacity: fadeShapeForms,
+            }}
+            className="text-muted-foreground text-2xl"
+          >
+            a shape forms
+          </motion.div>
+        </div>
+
+        <div className="fixed top-1/2 w-full -translate-y-1/2 text-center">
+          <motion.div
+            style={{
+              opacity: fadeStand,
+            }}
+            className="text-foreground text-2xl"
+          >
+            the second latitude
+          </motion.div>
+        </div>
       </div>
+
+      <div className="h-[400vh]"></div>
+
+      <nav className="[&>a]:text-muted-foreground [&>a]:hover:text-foreground relative z-20 flex w-full items-center justify-center gap-x-12 py-4 [&>a]:p-4">
+        <Link href="/manifesto" passHref>
+          manifesto
+        </Link>
+        <Link href="/whitepaper" passHref>
+          whitepaper
+        </Link>
+        <Link href="/observe" passHref>
+          observe
+        </Link>
+      </nav>
     </div>
   );
 };

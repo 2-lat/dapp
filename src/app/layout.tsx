@@ -43,11 +43,12 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${cmuSerif.variable}`} suppressHydrationWarning>
-      <body className="bg-background text-foreground">
+      <body className="bg-primary-foreground text-foreground">
         <TRPCReactProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="dark"
+            defaultTheme="system"
+            enableSystem
           >
             {children}
           </ThemeProvider>

@@ -1,12 +1,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@config "../../tailwind.config.ts";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme {
   --font-sans: var(--font-cmu-serif), ui-sans-serif, system-ui, sans-serif;
-  /* --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; */
 }
 
 @theme inline {
@@ -49,8 +49,10 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background-color: 1 0 0;
+  --background: oklch(var(--background-color));
+  --foreground-color: 0.145 0 0;
+  --foreground: oklch(var(--foreground-color));
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -83,8 +85,11 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
+  --font-sans: ui-sans, system-ui, sans;
+  --background-color: 0.145 0 0;
+  --background: oklch(var(--background-color));
+  --foreground-color: 0.985 0 0;
+  --foreground: oklch(var(--foreground-color));
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
@@ -122,5 +127,33 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  .stars-1 {
+    @apply shadow-stars-1 h-[2px] w-[2px] rounded-full animate-sparkle delay-0 duration-[2s] origin-center;
+  }
+
+  .stars-2 {
+    @apply shadow-stars-2 h-[2px] w-[2px] rounded-full animate-sparkle delay-200 duration-[3s] origin-center;
+  }
+
+  .stars-3 {
+    @apply shadow-stars-3 h-[2px] w-[2px] rounded-full animate-sparkle delay-400 duration-[1s] origin-center;
+  }
+
+  .stars-4 {
+    @apply shadow-stars-4 h-[2px] w-[2px] rounded-full animate-sparkle delay-600 duration-[5s] origin-center;
+  }
+
+  .stars-5 {
+    @apply shadow-stars-5 h-[2px] w-[2px] rounded-full animate-sparkle delay-800 duration-[0.5s] origin-center;
+  }
+
+  .modal-backdrop {
+    @apply absolute top-0 left-0 right-0 bottom-0 bg-[oklch(var(--background-color)/0.8)] flex flex-col justify-center items-center z-50;
+  }
+
+  .modal {
+    @apply w-full m-4 max-w-4xl border rounded-lg ring-1 ring-foreground/10 p-4;
   }
 }
