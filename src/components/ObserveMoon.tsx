@@ -3,10 +3,14 @@
 import { useMounted } from "@/hooks/useMounted";
 import { motion } from "motion/react";
 import { useTheme } from "next-themes";
-import { useMemo } from "react";
+import { useMemo, type ComponentProps } from "react";
 import { calculateMoonPath, getCurrentMoonPhase } from "@/utils/moon";
+import { cn } from "@/lib/utils";
 
-export const ObserveMoon = () => {
+export const ObserveMoon = ({
+  className,
+  ...props
+}: Omit<ComponentProps<typeof motion.svg>, 'ref'>) => {
   const isMounted = useMounted();
   const { resolvedTheme: theme } = useTheme();
   const isLight = theme === "light";
@@ -27,8 +31,10 @@ export const ObserveMoon = () => {
     <motion.svg
       width="100%"
       height="100%"
-      viewBox="0 0 1000 1000"
-      className="text-foreground fixed top-0 h-screen w-full"
+      viewBox="250 250 500 500"
+      className={cn("text-foreground", className)}
+      preserveAspectRatio="xMidYMid meet"
+      {...props}
     >
       <circle
         cx="500"

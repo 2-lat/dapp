@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
-import { ArrowDown } from "lucide-react";
-import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useMounted } from "@/hooks/useMounted";
 
@@ -30,7 +28,6 @@ const generatePoints = (SEGMENTS: number, radius: number = 200): Point[] => {
   }
 
   if (SEGMENTS === 2) {
-    // points[0] = [centerX + radius, centerY];
     for (let i = 0; i < MAX_POINTS; i++) {
       const progress = i / MAX_POINTS;
       if (progress <= 0.33) {
@@ -45,7 +42,7 @@ const generatePoints = (SEGMENTS: number, radius: number = 200): Point[] => {
 
   for (let i = 0; i < MAX_POINTS; i++) {
     const segment = Math.floor((i / MAX_POINTS) * SEGMENTS);
-    const angle = (segment / SEGMENTS) * Math.PI * 2; // - Math.PI / 2;
+    const angle = (segment / SEGMENTS) * Math.PI * 2;
     points[i] = [
       centerX + radius * Math.cos(angle),
       centerY + radius * Math.sin(angle),
@@ -61,7 +58,7 @@ const interpolatePoints = (
   progress: number,
 ): Point[] => {
   const result: Point[] = [];
-  const maxPoints = MAX_POINTS; // Always use MAX_POINTS points
+  const maxPoints = MAX_POINTS;
   const defaultPoint = points1[0] || [500, 500];
 
   for (let i = 0; i < maxPoints; i++) {
@@ -86,16 +83,13 @@ const pointsToPath = (points: Point[]): string => {
 export const AnimatedSVG = () => {
   const isMounted = useMounted();
   const { resolvedTheme: theme } = useTheme();
-
   const isWhite = theme === "light";
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollY, scrollYProgress } = useScroll({
+  const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
-
-  const reverseScrollY = useTransform(scrollY, (y) => -y);
 
   const onStage = (stage: number) => {
     return stage / SEGMENTS_COUNT;
@@ -123,18 +117,6 @@ export const AnimatedSVG = () => {
   const fadeStand = useTransform(
     scrollYProgress,
     [onStage(4.5), onStage(6)],
-    [0, 1],
-    { clamp: true },
-  );
-  const starsScale = useTransform(
-    scrollYProgress,
-    [onStage(0), onStage(6)],
-    [0, 1],
-    { clamp: true },
-  );
-  const starsOpacity = useTransform(
-    scrollYProgress,
-    [onStage(0), onStage(6)],
     [0, 1],
     { clamp: true },
   );
@@ -184,59 +166,6 @@ export const AnimatedSVG = () => {
   if (!isMounted) return null;
   return (
     <div ref={containerRef} className="relative w-full">
-      {!isWhite && (
-        <motion.div
-          className="fixed top-1/2 left-1/2 size-0"
-          style={{
-            opacity: starsOpacity,
-            scale: starsScale,
-          }}
-        >
-          <motion.div
-            className="stars-1"
-            style={{
-              scale: starsScale,
-            }}
-          ></motion.div>
-          <motion.div
-            className="stars-2"
-            style={{
-              scale: starsScale,
-            }}
-          ></motion.div>
-          <motion.div
-            className="stars-3"
-            style={{
-              scale: starsScale,
-            }}
-          ></motion.div>
-          <motion.div
-            className="stars-4"
-            style={{
-              scale: starsScale,
-            }}
-          ></motion.div>
-          <motion.div
-            className="stars-5"
-            style={{
-              scale: starsScale,
-            }}
-          ></motion.div>
-        </motion.div>
-      )}
-      <div className="text-foreground fixed top-0 z-10 mx-auto flex w-full flex-row items-center justify-center py-4">
-        <div className="text-3xl">
-          <span className="relative">
-            o
-            <span className="absolute left-1/2 -translate-x-1/2 translate-y-[0.04em] pr-[0.12em]">
-              |
-            </span>
-            <span className="absolute left-1/2 -translate-x-1/2 translate-y-[0.04em] pl-[0.12em]">
-              |
-            </span>
-          </span>
-        </div>
-      </div>
       <motion.svg
         width="100%"
         height="100%"
@@ -279,27 +208,12 @@ export const AnimatedSVG = () => {
             )),
           )
         )}
-        {false &&
-          points.map((p, i) => (
-            <g key={i}>
-              <circle key={i} cx={p[0]} cy={p[1]} r="10" fill="red" />
-              <text
-                x={p[0]}
-                y={p[1]}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fill="white"
-              >
-                {i}
-              </text>
-            </g>
-          ))}
       </motion.svg>
 
       {/* Text content */}
       <div className="fixed bottom-10 z-10 w-full text-center">
         <motion.div
-          style={{ y: reverseScrollY, opacity: fadeQuetly }}
+          style={{ opacity: fadeQuetly }}
           className="text-muted-foreground flex flex-col items-center gap-y-2 text-lg"
         >
           <span>enter quietly</span>
@@ -341,18 +255,6 @@ export const AnimatedSVG = () => {
       </div>
 
       <div className="h-[400vh]"></div>
-
-      <nav className="[&>a]:text-muted-foreground [&>a]:hover:text-foreground relative z-20 flex w-full items-center justify-center gap-x-12 py-4 [&>a]:p-4">
-        <Link href="/manifesto" passHref>
-          manifesto
-        </Link>
-        <Link href="/whitepaper" passHref>
-          whitepaper
-        </Link>
-        <Link href="/observe" passHref>
-          observe
-        </Link>
-      </nav>
     </div>
   );
 };

@@ -6,6 +6,7 @@ import localFont from "next/font/local";
 import { TRPCReactProvider } from "@/trpc/react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToggleTheme } from "@/components/toggle-theme";
+import { LayoutWrapper } from "@/components/LayoutWrapper";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -44,13 +45,13 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${cmuSerif.variable}`} suppressHydrationWarning>
-      <body className="bg-primary-foreground text-foreground">
+      <body className="bg-background text-foreground">
         <TRPCReactProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <main className="relative min-h-screen">
+            <LayoutWrapper>
               <ToggleTheme className="fixed top-4 right-4 z-20" />
               {children}
-            </main>
+            </LayoutWrapper>
           </ThemeProvider>
         </TRPCReactProvider>
       </body>
