@@ -1,7 +1,5 @@
-import { ObserveMoon } from "@/components/ObserveMoon";
+import { ObservePage } from "@/components/ObservePage";
 
 export default function Observe() {
-  return (
-      <ObserveMoon nextMoon={1745782260} />
-  );
+  return <ObservePage />;
 }
