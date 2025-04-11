@@ -12,11 +12,10 @@ export default function HomeLayout(
   props: Readonly<{ children: React.ReactNode; modal: React.ReactNode }>,
 ) {
   return (
-    <main className="relative min-h-screen">
-      <ToggleTheme className="fixed top-4 right-4 z-20" />
+    <>
       {props.children}
       {props.modal}
       <div id="modal-root" />
-    </main>
+    </>
   );
 }
