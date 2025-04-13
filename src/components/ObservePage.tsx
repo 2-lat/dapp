@@ -7,30 +7,50 @@ import { Button } from "@/components/ui/button";
 import { ObserveMoon } from "./ObserveMoon";
 import { cn } from "@/lib/utils";
 import { motion, useScroll, useTransform } from "motion/react";
-import { useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { api } from "@/trpc/react";
 
 export const ObservePage = () => {
+  const { data: latPrice, isLoading: priceLoading } = api.token.price.useQuery();
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [scroll, setScroll] = useState(0);
   const isMounted = useMounted();
   const { isConnected, latBalance, hasMembership } = mockWalletState;
-  const { latPrice, marketCap, lockedLat, nextMoonMembers } = mockStats;
+  const { marketCap, lockedLat, nextMoonMembers } = mockStats;
   const nextMoon = isMounted ? findNextNewMoon() : new Date();
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
+  const { scrollYProgress, scrollY } = useScroll();
+
+  const moonOpacity = useTransform(scrollYProgress, [0, 1], [1, 0], {
+    clamp: true,
+  });
+  const connectOpacity = useTransform(scrollYProgress, [0, 1], [0.5, 1], {
+    clamp: true,
   });
 
-  const moonOpacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  const connectOpacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
+  // Show all sections on big screens
+  const showAll = useMemo(() => scroll === 0 && scrollProgress === 1, [scroll, scrollProgress]);
+
+  useEffect(() => {
+    const unsubscribeY = scrollY.on("change", setScroll);
+    const unsubscribeP = scrollYProgress.on("change", setScrollProgress);
+    return () => {
+      unsubscribeY();
+      unsubscribeP();
+    };
+  }, [scrollYProgress]);
 
   return (
-    <div className="container mx-auto flex flex-col items-center justify-between gap-8" ref={containerRef}>
+    <div
+      className="container mx-auto flex flex-col items-center justify-between gap-8"
+      ref={containerRef}
+    >
       {/* Stats Section */}
       <motion.div
-        className="w-full max-w-4xl sticky top-40 bg-background/80 backdrop-blur-sm p-8"
-        style={{ opacity: moonOpacity }}
+        className="bg-background/80 sticky top-40 w-full max-w-4xl p-2 sm:p-4 lg:p-8 backdrop-blur-sm"
+        style={{ opacity: showAll ? 1 : moonOpacity }}
       >
         <div className="grid grid-cols-2 gap-8 text-center text-sm sm:grid-cols-3 lg:grid-cols-5">
           <div>
@@ -45,7 +65,9 @@ export const ObservePage = () => {
             <div className="text-muted-foreground mb-1 text-xs tracking-wider uppercase">
               2LAT Price
             </div>
-            <div className="font-mono">${latPrice}</div>
+            <div className="font-mono">
+              {priceLoading ? "Loading..." : `$${latPrice?.lamports}`}
+            </div>
           </div>
           <div>
             <div className="text-muted-foreground mb-1 text-xs tracking-wider uppercase">
@@ -68,11 +90,11 @@ export const ObservePage = () => {
         </div>
       </motion.div>
       {/* Moon Section */}
-      <ObserveMoon className="sticky top-24 max-h-[50vh] w-full max-w-sm" />
+      <ObserveMoon className="sticky top-24 max-h-[50vh] w-full max-w-sm z-50" />
       {/* CTA Section */}
       <motion.div
         className="bg-background/80 flex w-full max-w-xl flex-col items-center gap-8 p-8 text-center backdrop-blur-sm"
-        style={{ opacity: connectOpacity }}
+        style={{ opacity: showAll ? 1 : connectOpacity }}
       >
         {!isConnected && (
           <>

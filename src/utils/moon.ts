@@ -34,8 +34,8 @@ export const calculateMoonPath = (age: number, radius: number, cx: number, cy: n
   return `M ${A.x},${A.y} C ${AB.x},${AB.y} ${BA.x},${BA.y} ${B.x},${B.y} C ${BC.x},${BC.y} ${CB.x},${CB.y} ${C.x},${C.y} C ${CD.x},${CD.y} ${DC.x},${DC.y} ${D.x},${D.y} C ${DA.x},${DA.y} ${AD.x},${AD.y} ${A.x},${A.y} Z`;
 };
 
-export const getCurrentMoonPhase = () => {
-  return SunCalc.getMoonIllumination(new Date()).phase;
+export const getCurrentMoonPhase = (time: number) => {
+  return SunCalc.getMoonIllumination(new Date(time)).phase;
 };
 
 export const findNextNewMoon = () => {

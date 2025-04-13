@@ -3,7 +3,7 @@
 import { useMounted } from "@/hooks/useMounted";
 import { motion } from "motion/react";
 import { useTheme } from "next-themes";
-import { useMemo, type ComponentProps } from "react";
+import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import { calculateMoonPath, getCurrentMoonPhase } from "@/utils/moon";
 import { cn } from "@/lib/utils";
 
@@ -15,13 +15,14 @@ export const ObserveMoon = ({
   const { resolvedTheme: theme } = useTheme();
   const isLight = theme === "light";
   const radius = 200;
-  const currentAge = getCurrentMoonPhase();
+  const [time, setTime] = useState(Date.now());
+  const currentAge = getCurrentMoonPhase(time);
 
   const [pathA, pathB, pathC] = useMemo(() => {
     return [
       calculateMoonPath(currentAge % 1, radius, 500, 500),
-      calculateMoonPath((currentAge + 0.01) % 1, radius, 500, 500),
       calculateMoonPath((currentAge + 0.02) % 1, radius, 500, 500),
+      calculateMoonPath((currentAge + 0.04) % 1, radius, 500, 500),
     ];
   }, [currentAge]);
 
@@ -32,15 +33,21 @@ export const ObserveMoon = ({
       width="100%"
       height="100%"
       viewBox="250 250 500 500"
-      className={cn("text-foreground", className)}
+      className={cn("text-foreground rotate-[-24deg]", className)}
       preserveAspectRatio="xMidYMid meet"
       {...props}
     >
+      <defs>
+        <mask id="moon-mask">
+          <rect x="0" y="0" width="100%" height="100%" fill="black" />
+          <circle cx="500" cy="500" r="200" fill="white" />
+        </mask>
+      </defs>
       <circle
         cx="500"
         cy="500"
         r={isLight ? "201" : "200"}
-        fill={isLight ? "currentColor" : "transparent"}
+        fill={isLight ? "currentColor" : "bg-background"}
         stroke="currentColor"
         strokeWidth="1"
       />
@@ -53,8 +60,9 @@ export const ObserveMoon = ({
           key={color}
           d={path}
           fill="currentColor"
-          className={isLight ? "text-background" : `${color} mix-blend-screen`}
+          className={cn(isLight ? "text-background" : `${color} mix-blend-screen`)}
           strokeWidth="1"
+          mask={`url(#moon-mask)`}
         />
       ))}
     </motion.svg>

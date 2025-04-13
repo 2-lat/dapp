@@ -9,13 +9,11 @@ import {
 import { Dialog } from "@/components/ui/dialog";
 
 export default function HomeLayout(
-  props: Readonly<{ children: React.ReactNode; modal: React.ReactNode }>,
+  props: Readonly<{ children: React.ReactNode }>,
 ) {
   return (
     <>
       {props.children}
-      {props.modal}
-      <div id="modal-root" />
     </>
   );
 }

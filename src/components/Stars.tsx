@@ -1,55 +1,59 @@
 "use client";
 
-import { motion, useTransform } from "motion/react";
+import { motion, MotionValue } from "motion/react";
 import { useTheme } from "next-themes";
-import { usePathname } from "next/navigation";
-
-export const Stars = ({ starsOpacity, starsScale }: { starsOpacity: any; starsScale: any }) => {
+import { useMounted } from "@/hooks/useMounted";
+export const Stars = ({
+  starsOpacity,
+  starsScale,
+}: {
+  starsOpacity?: MotionValue<number>;
+  starsScale?: MotionValue<number>;
+}) => {
+  const isMounted = useMounted();
   const { resolvedTheme: theme } = useTheme();
-  const pathname = usePathname();
-  const isHome = pathname === "/";
   const isWhite = theme === "light";
 
-  if (isWhite) return null;
+  if (!isMounted || isWhite) return null;
 
   return (
     <motion.div
-      className="fixed top-1/2 left-1/2 size-0 z-[10]"
+      className="fixed top-1/2 left-1/2 z-10 size-0"
       style={{
-        opacity: isHome ? starsOpacity : 1,
-        scale: isHome ? starsScale : 1,
+        opacity: starsOpacity,
+        scale: starsScale,
       }}
     >
       <motion.div
         className="stars-1"
         style={{
-          scale: isHome ? starsScale : 1,
+          scale: starsScale,
         }}
       ></motion.div>
       <motion.div
         className="stars-2"
         style={{
-          scale: isHome ? starsScale : 1,
+          scale: starsScale,
         }}
       ></motion.div>
       <motion.div
         className="stars-3"
         style={{
-          scale: isHome ? starsScale : 1,
+          scale: starsScale,
         }}
       ></motion.div>
       <motion.div
         className="stars-4"
         style={{
-          scale: isHome ? starsScale : 1,
+          scale: starsScale,
         }}
       ></motion.div>
       <motion.div
         className="stars-5"
         style={{
-          scale: isHome ? starsScale : 1,
+          scale: starsScale,
         }}
       ></motion.div>
     </motion.div>
   );
-}; 
+};

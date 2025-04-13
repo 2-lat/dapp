@@ -185,9 +185,7 @@ export const AnimatedSVG = () => {
           />
         ) : (
           [
-            { blur: "blur-lg", thickness: "3" },
-            { blur: "blur-xs", thickness: "2" },
-            { blur: "blur-none", thickness: "1" },
+            { blur: "c", thickness: "1" },
           ].map(({ blur, thickness }) =>
             [
               { path: currentPathRed, color: "text-red-500" },
