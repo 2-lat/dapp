@@ -4,6 +4,7 @@ import { AccessPayment } from "../typechain-types";
 import { TwoLatToken } from "../typechain-types";
 import { MoonToken } from "../typechain-types";
 import { getSigners, advanceTime, CYCLE_DURATION } from "./helpers";
+import { ZeroAddress } from "ethers";
 
 describe("AccessPayment", function () {
   let accessPayment: AccessPayment;
@@ -24,19 +25,23 @@ describe("AccessPayment", function () {
     // Deploy tokens
     const TwoLatToken = await ethers.getContractFactory("TwoLatToken");
     twoLatToken = await TwoLatToken.deploy();
-    
+
     const MoonToken = await ethers.getContractFactory("MoonToken");
     moonToken = await MoonToken.deploy();
 
     // Deploy AccessPayment
     const AccessPayment = await ethers.getContractFactory("AccessPayment");
-    accessPayment = await upgrades.deployProxy(AccessPayment, [
-      await twoLatToken.getAddress(),
-      await moonToken.getAddress(),
-      owner.address, // treasury
-      owner.address, // lockManager
-      INITIAL_ACCESS_PRICE
-    ]);
+    accessPayment = await upgrades.deployProxy(
+      AccessPayment,
+      [
+        await twoLatToken.getAddress(),
+        await moonToken.getAddress(),
+        owner.address, // treasury
+        owner.address, // lockManager
+        INITIAL_ACCESS_PRICE,
+      ],
+      { constructorArgs: [ZeroAddress] },
+    );
     // Transfer some 2LAT to users
     await twoLatToken.transfer(user1.address, ethers.parseEther("10000"));
     await twoLatToken.transfer(user2.address, ethers.parseEther("10000"));
@@ -44,11 +49,16 @@ describe("AccessPayment", function () {
 
   describe("Deployment", function () {
     it("Should set the correct initial values", async function () {
-      expect(await accessPayment.twoLatToken()).to.equal(await twoLatToken.getAddress());
-      expect(await accessPayment.moonToken()).to.equal(await moonToken.getAddress());
+      expect(await accessPayment.twoLatToken()).to.equal(
+        await twoLatToken.getAddress(),
+      );
+      expect(await accessPayment.moonToken()).to.equal(
+        await moonToken.getAddress(),
+      );
       expect(await accessPayment.treasury()).to.equal(owner.address);
       expect(await accessPayment.lockManager()).to.equal(owner.address);
       expect(await accessPayment.accessPrice()).to.equal(INITIAL_ACCESS_PRICE);
+      expect(await accessPayment.owner()).to.equal(owner.address);
     });
 
     it("Should set the correct cycle duration", async function () {
@@ -83,8 +93,11 @@ describe("AccessPayment", function () {
     it("Should prevent non-owner from updating access price", async function () {
       const newPrice = ethers.parseEther("2000");
       await expect(
-        accessPayment.connect(user1).setAccessPrice(newPrice)
-      ).to.be.revertedWithCustomError(accessPayment, "OwnableUnauthorizedAccount");
+        accessPayment.connect(user1).setAccessPrice(newPrice),
+      ).to.be.revertedWithCustomError(
+        accessPayment,
+        "OwnableUnauthorizedAccount",
+      );
     });
   });
 
@@ -94,4 +107,4 @@ describe("AccessPayment", function () {
   // - notifyTreasury
   // - createLock
   // - issueMoon
-}); 
+});
