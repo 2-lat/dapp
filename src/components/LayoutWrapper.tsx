@@ -1,53 +1,77 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
+import { useMounted } from "@/hooks/useMounted";
+import { motion, useScroll } from "motion/react";
+import { useEffect, useRef, useState } from "react";
+import { Logotype } from "./Logotype";
 import { Navigation } from "./Navigation";
-import { Stars } from "./Stars";
-import { usePathname } from "next/navigation";
-
 export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
-  const pathname = usePathname();
-  const isHome = pathname === "/";
+  const mounted = useMounted();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [showNav, setShowNav] = useState(false);
-  const [isNavVisible, setIsNavVisible] = useState(!isHome);
+  const [inLogoVisible, setInLogoVisible] = useState(true);
+
   const { scrollYProgress, scrollY } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
   useEffect(() => {
-    if (isHome) setIsNavVisible(scrollYProgress.get() > 0.9);
-    else setIsNavVisible(true);
-  }, [isHome, scrollYProgress])
-
-  useEffect(() => {
-    if (!isHome) return;
-
-    const unsubscribe = scrollYProgress.on("change", (latest) => {
-      setIsNavVisible(latest > 0.9);
+    const unsubscribeScrollY = scrollY.on("change", (latest) => {
+      const previous = scrollY.getPrevious();
+      if (previous && latest > previous && latest > 150) {
+        setInLogoVisible(false);
+      } else {
+        setInLogoVisible(true);
+      }
     });
+    const unsubscribeScrollYProgress = scrollYProgress.on(
+      "change",
+      (latest) => {
+        setTimeout(() => {
+          console.log("latest progress", latest);
+          if (latest === 0 || latest === 1) {
+            console.log("setting nav visible");
+            setInLogoVisible(true);
+          }
+        }, 100);
+      },
+    );
 
-    return () => unsubscribe();
-  }, [isHome, scrollYProgress]);
+    return () => {
+      unsubscribeScrollY();
+      unsubscribeScrollYProgress();
+    };
+  }, [scrollY, scrollYProgress]);
 
   return (
     <div className="relative min-h-screen" ref={containerRef}>
-      <Navigation isVisible={isNavVisible} />
+      <Logotype isVisible={inLogoVisible} />
       <div className="relative min-h-screen">
         {/* Top gradient mask */}
-        <motion.div className="fixed top-0 left-0 right-0 h-48 bg-gradient-to-b from-background via-background/80 to-transparent z-[5] pointer-events-none" />
-        
+        <motion.div
+          className="from-background via-background/80 pointer-events-none fixed top-0 right-0 left-0 z-[5] h-48 bg-gradient-to-b to-transparent"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1 },
+          }}
+          animate={mounted ? (inLogoVisible ? "visible" : "hidden") : "hidden"}
+        />
         {/* Bottom gradient mask */}
-        <motion.div className="fixed bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/80 to-transparent z-[5] pointer-events-none" />
-        
+        <motion.div
+          className="from-background via-background/80 pointer-events-none fixed right-0 bottom-0 left-0 z-[5] h-48 bg-gradient-to-t to-transparent"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1 },
+          }}
+          animate={mounted ? (inLogoVisible ? "visible" : "hidden") : "hidden"}
+        />
+
         {/* Content with padding */}
-        <div className="py-40">
-          {children}
-        </div>
+        <div className="py-40">{children}</div>
       </div>
+
+      <Navigation isVisible={inLogoVisible} />
       {/* <Stars starsOpacity={isHome ? starsOpacity : undefined} starsScale={isHome ? starsScale : undefined} /> */}
     </div>
   );
-}; 
+};
