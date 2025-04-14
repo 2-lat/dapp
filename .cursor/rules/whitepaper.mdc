@@ -3,122 +3,356 @@ description:
 globs: 
 alwaysApply: true
 ---
-\documentclass[12pt]{article}
+\documentclass{article}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{geometry}
 \usepackage{enumitem}
-\usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{titlesec}
-
+\usepackage{ragged2e}
+\usepackage{booktabs}
 \geometry{a4paper, margin=1in}
 \titleformat{\section}{\bfseries\Large}{\thesection}{1em}{}
 \titleformat{\subsection}{\bfseries\large}{\thesubsection}{1em}{}
 
-\title{\textbf{2.lat: Stand Strong \\ A Whitepaper}}
-\author{}
-\date{}
+\title{\textbf{Second Latitude: \\A Futarchy-Based Funding Protocol}}
+\author{aler.eth}
+\date{13 Apr '25}
 
 \begin{document}
 \maketitle
 \tableofcontents
 \newpage
 
+\begin{abstract}
+    
+\vspace{1em}
+\noindent\centering
+after the rush\\
+a circle forms\\
+you stand
+\vspace{2em}
+
+\justifying
+Second Latitude is a futarchy-based funding protocol for those who don’t chase hype, but build — quietly, consistently, and deliberately.
+
+It is a decentralized mechanism that filters noise  
+by requiring participants to vote for projects  
+and spend voting power to be heard,  
+seen, and funded.
+
+Projects that earn sufficient support  
+can offer their tokens at a discount  
+via prediction-based OTC markets.  
+This creates a direct path  
+from belief to backing.
+\end{abstract}
+
 \section{Introduction}
+Fundraising is overloaded with noise, inflated metrics, and misaligned incentives. Builders are pushed to be loud, not build value. Funding flows toward visibility, not value.
 
-\subsection{What is 2.lat}
-\textbf{2.lat} is a decentralized protocol uniting a community of web3 builders and voters. It rewards builders who create what matters—driven by market needs and their passion—whether supported or not. Through rhythmic moon cycles, the protocol fosters trust and consistency over hype.
+\emph{Second Latitude introduces a structural correction.} It is a decentralized funding mechanism that filters noise through cost and commitment. Participants must pay to enter each funding cycle using the 2LAT token. IIn return, they receive MOON tokens—limited voting power used to support selected projects, nominate projects, and publish project updates.
 
-\subsection{Why We Exist}
-To empower builders who build with depth and purpose, recognized by a community that values real innovation.
 
-\section{Token Architecture}
+To be heard, users must spend influence. 
 
-\subsection{2LAT Token}
-\begin{itemize}[leftmargin=*]
-    \item Fairlaunched on Solana via a bonding curve through pump.fun.
-    \item Total supply: 1,000,000,000 tokens, with no additional issuance.
+To be funded, builders must gather distributed, verifiable support. 
+
+Each vote allocates a portion of the shared treasury, sourced from access payments.  
+Projects that meet the minimum threshold become eligible for subsidies.  
+Funding is distributed via quadratic weighting, ensuring that broad support matters more than concentrated stake.
+
+This creates a dynamic where capital flows to builders who demonstrate acceptance.
+
+Prediction markets extend this alignment.  
+Participants can stake 2LAT on the success or failure of approved projects.  
+Those who predict correctly are rewarded from the pool.  
+The protocol prices belief — and returns value where conviction proves accurate.
+
+By combining cyclical access, costly signal, and futarchy-based resolution,  
+Second Latitude funds what survives attention — and what stands beyond it.
+
+\section{Tokens}
+
+Our protocol operates with two distinct tokens:
+
+\subsection*{2LAT Token}
+\begin{itemize}
+    \item Fairlaunched on Base via a bonding curve.
+    \item Total supply: 1,000,000,000 tokens (no additional issuance).
+    \item Purpose: Facilitates cycle access payments and staking in prediction markets.
 \end{itemize}
 
-\subsection{MOON Token}
-\begin{itemize}[leftmargin=*]
-    \item Non-transferable token issued to users per cycle payment.
-    \item Used for voting and nominating builders.
-    \item Burns at the end of each cycle if unused.
+\subsection*{MOON Token}
+\begin{itemize}
+    \item Non-transferable token issued upon cycle payment.
+    \item Burns at cycle’s end if unused.
+    \item Purpose: Governance token used to nominate builders, allocate treasury subsidies, publish project updates, and vote on prediction market entry.
 \end{itemize}
+
+
+\section{Protocol Setup}
+\label{sec:setup}
+The Second Latitude protocol is governed by a set of parameters that define its operation. These parameters are summarized below and referenced throughout the document. Initial values are provided in Appendix \ref{app:parameters}.
+
+\begin{itemize}
+    \item \(\phi_A\): Price of participation of the next cycle.
+    \item \(\phi_T\): Fraction of access payment \( \phi_A \) allocated to the treasury, where \(\phi_T \in \mathbb{R}, 0 < \phi_T \leq 1 \)
+    \item \(\phi_L\): Fraction of access payment \( \phi_A \) that is locked for each cycle, where \(\phi_L = 1 -\phi_T \)
+    \item \( \phi_C \): Number of cycles for which the locked amount is held, where \( \phi_C \in \mathbb{N}, \phi_C > 0 \).
+    \item \(\phi_F\): Fraction of the prediction market pool deducted as a protocol fee.
+    \item \(\phi_D\): Maximum value for the project cut multiplier \(\Delta\).
+    \item \(\phi_V\): Voting threshold required for builder eligibility.
+    \item \(\phi_M\): The amount of MOON votes received at the beginning of the cycle.
+    \item \(\phi_N\): The amount of MOON votes required to nominate project.
+    \item \(\phi_U\): The amount of MOON votes required to publish project update (to collect votes).
+\end{itemize}
+
+These parameters may be adjusted for future cycles based on governance decisions, as described in Section \ref{sec:governance}.
 
 \section{Moon Cycles and Access}
 
-\subsection{Cycle Duration}
-One moon cycle = 29.5 days.
-
-\subsection{Access Payment}
-\begin{itemize}[leftmargin=*]
-    \item Users pay a fixed amount: $\text{PRICE}$ in 2LAT to access each cycle.
-    \item Payment breakdown:
-    \begin{align*}
-        \text{Locked Amount} &= 0.9 \times \text{PRICE} \quad \text{(locked for 3 cycles)} \\
-        \text{Protocol Treasury} &= 0.1 \times \text{PRICE} \quad \text{(for builder subsidies)} \\
-    \end{align*}
-    \item Users receive $M$ MOON tokens per payment for voting.
-\end{itemize}
-
-\subsection{Locking Mechanism}
-\begin{itemize}[leftmargin=*]
-    \item For each cycle $i$ paid, $L_i = 0.9 \times \text{PRICE}$ is locked for 3 cycles.
-    \item When paying for cycle $i$, $L_i-3$ (locked from cycle $i-3$) is unlocked, if exists.
-    \item If the user does not pay for cycle $i$, $\bigcup_{k = i - l}^{i - 1} L_k$ is burned at the beginning of cycle $i$.
-\end{itemize}
-This mechanism gradually reduces effective cost for consistent contributors, approaching a 90\% discount over time.
-
-\section{Builder Rewards}
-
-\subsection{Voting and Nomination}
-\begin{itemize}[leftmargin=*]
-    \item Users allocate MOON tokens to vote for or nominate builders.
-    \item MOON reflects community trust and attention.
-\end{itemize}
-
-\subsection{Subsidy Distribution}
-\begin{itemize}[leftmargin=*]
-    \item Treasury 2LAT is distributed to builders via quadratic funding based on MOON votes.
-    \item For builder $B_i$, subsidy $P_i = \dfrac{\left( \sum_{j} \sqrt{m_{i,j}} \right)^2}{\sum_k \left( \sum_{j} \sqrt{m_{k,j}} \right)^2} \cdot R$, where:
+\begin{itemize}
+    \item \textbf{Cycle Duration}: One moon cycle lasts 29.5 days (2,548,800 seconds).
+    \item \textbf{Access Payment}:
     \begin{itemize}
-        \item $m_{i,j}$ = MOON from user $j$ to builder $B_i$.
-        \item $R$ = total subsidy pool.
+        \item User \( i \) pays a fixed amount \( \phi_A \) in 2LAT to join the next cycle, where \( A_i \) is user \( i \) payment.
+        \item Breakdown:
+        \begin{itemize}
+            \item \textbf{Locked Amount}: \( L_i = \phi_L \times A_i \), locked for \( \phi_C \) cycles.
+            \item \textbf{Treasury Allocation}: \( T_i = \phi_T \times A_i \), used for builders subsidies.
+        \end{itemize}
+        \item Reward: Users receive \( \phi_M \) MOON tokens per payment for governance voting.
+    \end{itemize}
+    \item \textbf{Locking Mechanism}:
+    \begin{itemize}
+        \item For cycle \( i \), the locked amount is \( L_i = \phi_L \times \phi_A \).
+        \item Unlocks occur after \( \phi_C \) cycles: \( L_{i-\phi_C} \) becomes available.
+        \item \textbf{Skipping a cycle burns all prior locked amounts.}
+        \item \textbf{Benefit}: Long-term participants can reduce their effective cost by up to 90\%.
     \end{itemize}
 \end{itemize}
 
-\subsection{Voter Rewards}
-\begin{itemize}[leftmargin=*]
-    \item Voters of rewarded builders receive a share of the subsidy, proportional to their MOON contribution.
+
+\section{Governance and Parameter Voting}
+\label{sec:governance}
+
+Before the end of each moon cycle, MOON token holders may vote to adjust protocol parameters for the next cycle. This process ensures the protocol remains adaptive to community needs and market conditions. The adjustable parameters include:
+
+\begin{itemize}
+    \item \(\phi_A\): Price of participation of the next cycle.
+    \item \(\phi_F \): Protocol fee fraction.
+    \item \(\phi_D \): Project cut multiplier cap.
+    \item \(\phi_T \): Fraction of access payment allocated to the treasury.
+    \item \(\phi_M\): The amount of MOON votes received at the beginning of the cycle.
+    \item \(\phi_N\): The amount of MOON votes required to nominate project.
+    \item \(\phi_U\): The amount of MOON votes required to publish project update (to collect votes).
+    \item \(\phi_V\): Voting threshold required for builder eligibility.
+\end{itemize}
+
+Voting is conducted using MOON tokens, with each token representing one vote. Approved changes take effect in \( \phi_C \) cycles, maintaining stability within the current locks.
+
+
+\section{Project Selection via Governance}
+
+The governance process enables users to nominate and vote for builders, while builders share updates to demonstrate progress. Using MOON tokens, participants collectively determine which projects qualify for builder subsidies and prediction markets, as detailed below.
+
+\begin{itemize}
+    \item Users nominate projects by burning \(\phi_N\) MOON tokens. Nominations do not contribute to voting totals but allow projects to participate on the protocol. Users may vote for each nomination by casting one MOON token, with a limit of one vote per user per nomination. 
+    \item Projects share updates by burning \(\phi_U\) MOON tokens per update. Users may vote for each update by casting one MOON token, with a limit of one vote per user per update.
+    \item For each builder \( B_i \), the votes \( m_{i,j} \) from user \( j \) may include one vote for the nomination (if cast) and one vote for each update the user supports .
+    \item The total votes for builder \( B_i \) are computed as \( V_i = \sum_j m_{i,j} \). Builders with \( V_i \geq \phi_V \) become eligible to receive builder subsidies (Section~\ref{sec:subsidies}) and offer a prediction market for their token (Section~\ref{sec:markets}).
+\end{itemize}
+
+\section{Builder Subsidies}
+\label{sec:subsidies}
+\subsection*{Treasury and Subsidy Pool}
+
+\begin{itemize}
+    \item \( \phi_T \) of each cycle payment contributes to the treasury \( T \).
+    \item The cumulative treasury across users forms the subsidy pool:
+    \[
+    \mathcal{R} = \sum_{i=1}^{N} T_i = \sum_{i=1}^{N} \phi_TA_i
+    \]
+    \item This pool is allocated to builders via quadratic funding.
+\end{itemize}
+
+\subsection*{Quadratic Subsidy Distribution with Threshold}
+At the end of the cycle, Builders receive subsidies based on the square of the sum of square roots of votes, encouraging broad support across nominations and updates:
+
+\begin{align*}
+    Q_i =
+    \begin{cases}
+        \dfrac{\left( \sum_j \sqrt{m_{i,j}} \right)^2}
+              {\sum\limits_{k \in \mathcal{E}} \left( \sum_j \sqrt{m_{k,j}} \right)^2} \cdot \mathcal{R}, & \text{if } V_i \geq \phi_V \\
+        0, & \text{overwise}
+    \end{cases}
+\end{align*}
+
+\begin{itemize}
+    \item \( Q_i \): Subsidy allocated to builder \( B_i \).
+    \item \( \mathcal{E} \): Set of all eligible builders such that \( B_k \in \mathcal{E} \iff V_k \geq \phi_V \).
+    \item \( m_{i,j} \): Votes from user \( j \) to builder \( B_i \), including one nomination vote and one vote per supported update.
+    \item \( \mathcal{R} \): Total treasury reward pool from \(\phi_T\) of cycle access payments.
+\end{itemize}
+
+\section{Futarchy-Based Prediction Markets}
+\label{sec:markets}
+Each eligible project may choose to offer a specified amount of their existing or future tokens for the prediction market, enabling a market-driven evaluation of their potential success.
+
+To participate, the project must define several key parameters. \\
+The \textbf{prediction execution time} specifies when the success or failure of the project will be assessed. \\
+The \textbf{entry price} determines the cost at which the protocol acquires the project’s tokens for distribution to predictors. \\
+The \textbf{expected price} represents the target token price anticipated at the moment of execution, serving as the benchmark for the prediction’s outcome. \\
+The \textbf{maximum token amount} specifies the upper limit of tokens the project is willing to sell at the entry price. \\
+
+Participants stake 2LAT tokens on whether this target will be achieved by the execution time, with payouts reflecting the resolution—providing projects with immediate funding while leveraging futarchy-based decision-making to align incentives.
+
+Let the following variables define the prediction mechanics:
+
+\begin{itemize}
+    \item \( \mathcal{S} \): Total 2LAT staked on success.
+    \item \( \mathcal{F} \): Total 2LAT staked on failure.
+    \item \( \mathcal{T} = \mathcal{S} + \mathcal{F} \): Total prediction market pool.
+    \item \( \Phi = \phi_F \times \mathcal{T} \): Protocol fee.
+    \item \( p_E \): Price at which project tokens are entered on the prediction market (entry price).
+    \item \( p_S \): Expected project token price at moment of prediction execution, where \( p_S > p_E \).
+    \item \( \Delta = \min\left(\frac{p_S - p_E}{p_E}, \phi_D\right) \): Project reward multiplier cap.
+    \item \( \mathcal{I} = \Delta \mathcal{T} \): Project’s immediate funding in 2LAT (project cut).
+    \item \( \mathcal{X} = \frac{\mathcal{I}}{p_E} \): Number of project tokens purchased by the protocol.
+    \item \( \mathcal{D} = \mathcal{T} - \Phi - \mathcal{I} \): Distributable pool for predictors in 2LAT.
+\end{itemize}
+
+\subsection*{Project Funding}
+
+\begin{itemize}
+    \item The project receives \( \mathcal{I} \) in 2LAT for development.
+    \item The protocol uses \( \mathcal{I} \) to buy \( N_{\text{tokens}} \) project tokens at price \( p_E \) for distribution to correct predictors.
+\end{itemize}
+
+\subsection*{Payouts}
+
+\paragraph{If success:} (token price at execution \( \geq p_S \))
+\begin{itemize}
+    \item Success predictors receive:
+    \begin{itemize}
+        \item \textbf{2LAT}: \( \mathcal{D} \) distributed proportionally to their stake.
+        \item \textbf{Project Tokens}: \( \mathcal{X} \) distributed proportionally to their stake.
+    \end{itemize}
+    \item Payout per user \( i \) with stake \( s_i \):
+    \[
+    x_i = \left( \frac{s_i}{\mathcal{S}} \right) \mathcal{D} \text{ (in 2LAT)} + \left( \frac{s_i}{\mathcal{S}} \right) \mathcal{X} \text{ (in project tokens)}
+    \]
+\end{itemize}
+
+\paragraph{If failure:} (token price at execution \( < p_S \))
+\begin{itemize}
+    \item Failure predictors receive:
+    \begin{itemize}
+        \item \textbf{2LAT}: \( \mathcal{D} \) distributed proportionally to their stake.
+        \item \textbf{Project Tokens}: \( \mathcal{X} \) distributed proportionally to their stake.
+    \end{itemize}
+    \item Payout per user \( i \) with stake \( f_i \):
+    \[
+    x_i = \left( \frac{f_i}{\mathcal{F}} \right) \mathcal{D} \text{ (in 2LAT)} + \left( \frac{f_i}{\mathcal{F}} \right) \mathcal{X} \text{ (in project tokens)}
+    \]
+\end{itemize}
+
+\section{Builder Rewards}
+
+\begin{itemize}
+    \item \textbf{Direct Funding}: Projects receive \( \mathcal{I} \) in 2LAT.
+    \item \textbf{Subsidies}: Projects eligible for subsidies receive a portion of the treasury according to a quadratic distribution (Section \ref{sec:subsidies}).
+    \item \textbf{Visibility}: MOON vote counts signal trust and drive visibility.
 \end{itemize}
 
 \section{Cycle Summary}
 
-\begin{enumerate}[leftmargin=*]
-    \item User pays $\text{PRICE}$ in 2LAT.
-    \item 90\% is locked for 3 cycles, 10\% goes to treasury.
-    \item User receives $M$ MOON tokens.
-    \item User votes/nominates builders with MOON.
-    \item Builders receive 2LAT subsidies via quadratic funding.
-    \item Voters of winning builders share subsidies.
-    \item Unused MOON tokens burn at cycle’s end.
+\begin{enumerate}
+    \item \textbf{Join}: Pay \( \phi_A \) in 2LAT (\(\phi_L \times \phi_A \) locked, \( \phi_T \times \phi_A \) to treasury), receive \( \phi_M \) MOON.
+    \item \textbf{Vote}: Burn MOON to nominate, support and vote for projects.
+    \item \textbf{Stake}: Place 2LAT on project success (\( \mathcal{S} \)) or failure (\( \mathcal{F} \)).
+    \item \textbf{Reset}: MOON burns if unused; new cycle begins.
 \end{enumerate}
-
-\section{Glossary}
-
-\begin{itemize}[leftmargin=*]
-    \item \textbf{2LAT} — Fairlaunched token for cycle access and subsidies.
-    \item \textbf{MOON} — Voting token, non-transferable, burns if unused.
-    \item \textbf{PRICE} — Fixed 2LAT payment per cycle.
-    \item \textbf{Treasury} — 2LAT pool for builder rewards.
-    \item \textbf{Cycle} — 29.5-day moon rhythm.
-\end{itemize}
 
 \section{Conclusion}
 
-2.lat is a protocol for builders who stand strong and a community that rewards them. It’s about rhythm, trust, and cutting through the noise—no shortcuts, just recognition.
+\textit{Second Latitude combines the rhythmic trust of 2.lat with futarchy’s market-driven precision, creating a funding engine for builders who deliver and investors who discern value. We’re raising 2LAT now to fuel this vision—join us to lead the future of web3 funding.}
+
+\newpage
+
+\appendix
+\section*{Appendix: Initial Protocol Parameters}
+\label{app:parameters}
+
+The following table summarizes the initial values of the protocol's parameters as defined in the Second Latitude whitepaper.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lllp{6cm}}
+\toprule
+\textbf{Symbol} & \textbf{Description} & \textbf{Initial Value} \\
+\midrule
+\(\phi_A\) & Price of participation per cycle & 1000 \\
+\(\phi_L\) & Fraction of access payment locked & 90\% \\
+\(\phi_T\) & Fraction of access payment to treasury & 10\% \\
+\(\phi_C\) & Number of cycles for lock & 3  \\
+\(\phi_F\) & Protocol fee fraction & 5\% \\
+\(\phi_D\) & Project reward multiplier cap & 20\% \\
+\(\phi_V\) & Voting threshold for builder eligibility & 50 \\
+\(\phi_M\) & The amount of MOON votes received at the beginning of the cycle. & 100 \\
+\(\phi_N\) & The amount of MOON votes required to nominate project. & 50 \\
+\(\phi_U\) & The amount of MOON votes required to publish project update & 10 \\
+\bottomrule
+\end{tabular}
+\caption{Initial values of protocol parameters.}
+\label{tab:parameters}
+\end{table}
+
+
+\newpage
+
+
+\appendix
+\section*{Appendix: Prediction Execution and Cross-Chain Asset Integration}
+\label{app:execution}
+
+This appendix outlines mechanisms to ensure the accurate execution of predictions in the Second Latitude protocol’s futarchy-based prediction markets, as described in Section \ref{sec:markets}. It also details strategies for integrating cross-chain assets to enable participation of diverse token types and non-token outcomes, ensuring flexibility and robustness in the protocol’s funding ecosystem.
+
+\subsection*{Prediction Execution Mechanisms}
+
+The prediction market resolves based on whether a project’s token price at the execution time meets or exceeds the expected price \( p_S \). Accurate and transparent execution is critical to maintain trust and align incentives. The protocol employs tailored mechanisms depending on the asset type and prediction context, as follows:
+
+\begin{itemize}
+    \item \textbf{Base Tokens} (Native to the Base blockchain):
+    \begin{itemize}
+        \item \textbf{Escrow}: Tokens are held in on-chain escrow smart contracts deployed on Base. These contracts lock the project’s tokens (\( N_{\text{tokens}} \)) at the entry price \( p_E \) until the prediction execution time, ensuring availability for distribution to correct predictors.
+        \item \textbf{Price Exploration}: The token price at execution is determined using Uniswap V3 pools on Base. The protocol queries the time-weighted average price (TWAP) over a predefined interval (e.g., 1 hour) from the relevant Uniswap pool to mitigate manipulation risks and ensure a fair market price. If multiple pools exist, the protocol selects the pool with the highest liquidity to enhance reliability.
+        \item \textbf{Execution}: At the execution time, the smart contract compares the TWAP to \( p_S \). If the TWAP \( \geq p_S \), success predictors receive their share of \( \mathcal{D} \) (in 2LAT) and \( N_{\text{tokens}} \) (in project tokens); otherwise, failure predictors receive the payouts, as detailed in Section \ref{sec:markets}.
+    \end{itemize}
+
+    \item \textbf{Foreign Tokens} (Tokens on other blockchains):
+    \begin{itemize}
+        \item \textbf{Escrow}: Cross-chain escrow is facilitated using LayerZero and/or Chainlink Cross-Chain Interoperability Protocol (CCIP). The project locks tokens on their native chain in a compatible escrow contract. A cross-chain message (via LayerZero) or token transfer (via Chainlink CCIP) confirms the lock to the Base chain, ensuring the protocol can distribute equivalent token claims or bridged tokens to predictors.
+        \item \textbf{Price Oraclization}: The token price is obtained via Chainlink price feeds on the native chain (or CCIP workaround for assets without official price feeds), oraclized to Base. The protocol uses a decentralized oracle network to fetch the token’s market price (e.g., from a major decentralized exchange on the native chain) at execution time, adjusted for any cross-chain price discrepancies (e.g., bridging fees). To prevent flash-loan attacks, the price is averaged over a short window (e.g., 30 minutes).
+        \item \textbf{Execution}: The oraclized price is compared to \( p_S \). Payouts are distributed as described in Section \ref{sec:markets}, with tokens either bridged to Base for distribution or represented as claimable rights on the native chain, depending on the escrow setup.
+    \end{itemize}
+
+    \item \textbf{Future Tokens} (Tokens not yet issued):
+    \begin{itemize}
+        \item \textbf{Escrow}: Since future tokens do not exist at the time of the prediction market, the protocol leverages off-chain legal agreements to enforce obligations. Projects enter into a \textbf{Simple Agreement for Future Tokens (SAFT)} (or analogous agreements compliant with the project’s jurisdiction), specifying the commitment to issue \( N_{\text{tokens}} \) (up to \( N_{\text{max}} \)) at \( p_E \) upon token creation. The SAFT is countersigned by trusted escrow agents (e.g., legal firms or decentralized arbitration entities) to ensure enforceability.
+        \item \textbf{Price Exploration}: Upon token issuance, the price is determined using the same mechanism as Base tokens (Uniswap TWAP) if launched on Base, or oraclized prices if launched elsewhere. If the token is not issued by the execution time, the prediction market may resolve as a failure, or an alternative metric (e.g., project milestone completion) may be used, as specified in the SAFT.
+        \item \textbf{Execution}: At execution, the protocol verifies the token issuance and price. If issued, payouts follow Section \ref{sec:markets}. If not issued, the escrow agents enforce penalties (e.g., forfeiture of collateral) to compensate predictors, with 2LAT payouts adjusted accordingly.
+    \end{itemize}
+
+    \item \textbf{Non-Token Predictions} (Future Expansion):
+    \begin{itemize}
+        \item \textbf{Framework}: For predictions not tied to token prices (e.g., project milestones, market adoption metrics), the protocol plans to integrate with Polymarket, a decentralized prediction market platform, to leverage its robust outcome resolution mechanisms.
+        \item \textbf{Escrow}: Funds (in 2LAT) are held in Base escrow contracts, with outcomes linked to Polymarket markets or oraclized external data. No project tokens are involved, as payouts are purely in 2LAT from \( \mathcal{D} \).
+        \item \textbf{Oraclization}: Chainlink oracles fetch outcome data (e.g., API results, verified milestone reports) or Polymarket resolution outcomes, ensuring decentralized and tamper-resistant resolution.
+        \item \textbf{Execution}: The oraclized outcome determines success or failure, with payouts distributed proportionally from \( \mathcal{D} \) to correct predictors. Non-token predictions simplify token distribution but require robust oracle design to maintain trust.
+    \end{itemize}
+\end{itemize}
 
 \end{document}

@@ -23,3 +23,13 @@ Backend:
 - Drizzle Kit for ORM and database difference abstraction 
 
 
+Contracts:
+- Hardhat
+- Openzeppelin
+- Solidity
+
+
+ALWAYS USE PNPM!
+
+
+
