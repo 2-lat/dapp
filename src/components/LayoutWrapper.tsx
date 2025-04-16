@@ -28,9 +28,7 @@ export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
       "change",
       (latest) => {
         setTimeout(() => {
-          console.log("latest progress", latest);
-          if (latest === 0 || latest === 1) {
-            console.log("setting nav visible");
+          if (latest <= 0.001 || latest >= 0.999) {
             setInLogoVisible(true);
           }
         }, 100);

@@ -159,7 +159,6 @@ Q_i =
 0, & \\text{otherwise}
 \\end{cases}
 $$
-
 - $$Q_i$$: Subsidy allocated to builder $$B_i$$.
 - $$\\mathcal{E}$$: Set of all eligible builders such that $$B_k \\in \\mathcal{E} \\iff V_k \\geq \\phi_V$$.
 - $$m_{i,j}$$: Votes from user $$j$$ to builder $$B_i$$, including one nomination vote and one vote per supported update.
@@ -179,7 +178,6 @@ To participate, the project must define several key parameters:
 Participants stake 2LAT tokens on whether this target will be achieved by the execution time, with payouts reflecting the resolution—providing projects with immediate funding while leveraging futarchy-based decision-making to align incentives.
 
 Let the following variables define the prediction mechanics:
-
 - $$\\mathcal{S}$$: Total 2LAT staked on success.
 - $$\\mathcal{F}$$: Total 2LAT staked on failure.
 - $$\\mathcal{T} = \\mathcal{S} + \\mathcal{F}$$: Total prediction market pool.

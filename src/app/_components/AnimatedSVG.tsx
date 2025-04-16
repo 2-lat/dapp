@@ -148,7 +148,11 @@ export const AnimatedSVG = () => {
       setPoints(interpolatePoints(currentPoints, nextPoints, progress));
       setCurrentPathRed(
         pointsToPath(
-          interpolatePoints(currentPoints, nextPoints, Math.pow(progress, stage === 1 ? 1 : 0.5)),
+          interpolatePoints(
+            currentPoints,
+            nextPoints,
+            Math.pow(progress, stage === 1 ? 1 : 0.5),
+          ),
         ),
       );
       setCurrentPathGreen(
@@ -156,12 +160,24 @@ export const AnimatedSVG = () => {
       );
       setCurrentPathBlue(
         pointsToPath(
-          interpolatePoints(currentPoints, nextPoints, Math.pow(progress, stage === 1 ? 1 : 1.5)),
+          interpolatePoints(
+            currentPoints,
+            nextPoints,
+            Math.pow(progress, stage === 1 ? 1 : 1.5),
+          ),
         ),
       );
     });
     return () => unsubscribe();
   }, [scrollYProgress, allPoints]);
+
+  const handleEnterScroll = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    window.scrollTo({
+      top: window.innerHeight * 4,
+      behavior: "smooth",
+    });
+  };
 
   if (!isMounted) return null;
   return (
@@ -184,9 +200,7 @@ export const AnimatedSVG = () => {
             transition={{ duration: 0.5 }}
           />
         ) : (
-          [
-            { blur: "c", thickness: "1" },
-          ].map(({ blur, thickness }) =>
+          [{ blur: "c", thickness: "1" }].map(({ blur, thickness }) =>
             [
               { path: currentPathRed, color: "text-red-500" },
               { path: currentPathGreen, color: "text-green-500" },
@@ -209,14 +223,18 @@ export const AnimatedSVG = () => {
       </motion.svg>
 
       {/* Text content */}
-      <div className="fixed bottom-10 z-10 w-full text-center">
-        <motion.div
+      <div className="fixed top-2/3 z-10 w-full text-center">
+        <motion.a
           style={{ opacity: fadeQuetly }}
-          className="text-muted-foreground flex flex-col items-center gap-y-2 text-lg"
+          className="group text-muted-foreground hover:text-foreground transition-colors flex flex-col items-center gap-y-2 text-lg"
+          onClick={handleEnterScroll}
+          href="#enter-quietly"
         >
           <span>enter quietly</span>
-          <span className="animate-bounce">↓</span>
-        </motion.div>
+          <div className="group-hover:border-foreground/50 border-foreground/25 transition-colors mt-2 aspect-[4/9] rounded-full border p-2 py-4">
+            <div className="relative animate-bounce">↓</div>
+          </div>
+        </motion.a>
 
         <div className="fixed top-1/2 w-full pt-10 text-center">
           <motion.div
