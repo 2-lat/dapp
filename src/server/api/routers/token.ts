@@ -1,11 +1,9 @@
-import { z } from "zod";
 
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
-import { posts } from "@/server/db/schema";
 import { env } from "@/env";
+import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 
 export const tokenRouter = createTRPCRouter({
-  price: publicProcedure.query(async ({ ctx }) => {
+  price: publicProcedure.query(async () => {
     const lat = env.NEXT_PUBLIC_2LAT_ADDRESS;
     const [usd, lamports] = await Promise.all(
       ["usd", "lamports"].map((quote) =>

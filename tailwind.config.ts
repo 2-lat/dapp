@@ -1,8 +1,7 @@
-import { keyframes } from "motion/react";
 import type { Config } from "tailwindcss";
 
 
-const generateRandomStars = (opacity: string, density: number) => {
+const generateRandomStars = (opacity: number, density: number) => {
     const stars = [];
     while(density > 0) {
         const angle = Math.random() * 2 * Math.PI;

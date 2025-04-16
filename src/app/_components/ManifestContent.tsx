@@ -3,14 +3,9 @@
 import { type ComponentProps } from "react";
 import Markdown from "./Markdown";
 
-export const ManifestContent = ({
-  className,
-  ...props
-}: Omit<ComponentProps<typeof Markdown>, "children"> & {
-  className?: string;
-}) => {
+export const ManifestContent = (props: Omit<ComponentProps<typeof Markdown>, "children">) => {
   return (
-    <Markdown>
+    <Markdown {...props}>
       {`
 :::page
 ## What is Second Latitude?

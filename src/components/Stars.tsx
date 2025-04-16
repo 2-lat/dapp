@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, MotionValue } from "motion/react";
+import { motion, type MotionValue } from "motion/react";
 import { useTheme } from "next-themes";
 import { useMounted } from "@/hooks/useMounted";
 export const Stars = ({

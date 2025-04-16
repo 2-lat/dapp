@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useTheme } from "next-themes";
 import { useMounted } from "@/hooks/useMounted";
@@ -17,11 +17,11 @@ SEGMENTS.push(1);
 SEGMENTS = SEGMENTS.reverse();
 const SEGMENTS_COUNT = SEGMENTS.length;
 
-const generatePoints = (SEGMENTS: number, radius: number = 200): Point[] => {
+const generatePoints = (SEGMENTS: number, radius = 200): Point[] => {
   const centerX = 500;
   const centerY = 500;
   const defaultPoint: Point = [centerX, centerY];
-  const points: Point[] = Array(MAX_POINTS).fill(defaultPoint);
+  const points: Point[] = Array.from({ length: MAX_POINTS }, () => Object.assign({}, defaultPoint));
 
   if (SEGMENTS === 1) {
     return points;
@@ -59,11 +59,11 @@ const interpolatePoints = (
 ): Point[] => {
   const result: Point[] = [];
   const maxPoints = MAX_POINTS;
-  const defaultPoint = points1[0] || [500, 500];
+  const defaultPoint = points1[0] ?? [500, 500];
 
   for (let i = 0; i < maxPoints; i++) {
-    const p1: Point = points1[i] || defaultPoint;
-    const p2: Point = points2[i] || defaultPoint;
+    const p1: Point = points1[i] ?? defaultPoint;
+    const p2: Point = points2[i] ?? defaultPoint;
     const x = p1[0] + (p2[0] - p1[0]) * progress;
     const y = p1[1] + (p2[1] - p1[1]) * progress;
     result.push([x, y] as Point);
@@ -122,7 +122,7 @@ export const AnimatedSVG = () => {
   );
 
   const allPoints = SEGMENTS.map((s) => generatePoints(s));
-  const defaultPoints = generatePoints(1);
+  const defaultPoints = useMemo(() => generatePoints(1), []);
   const [currentPathRed, setCurrentPathRed] = useState(() =>
     pointsToPath(defaultPoints),
   );
@@ -133,8 +133,6 @@ export const AnimatedSVG = () => {
     pointsToPath(defaultPoints),
   );
 
-  const [points, setPoints] = useState(defaultPoints);
-
   useEffect(() => {
     const unsubscribe = scrollYProgress.on("change", (latest: number) => {
       const stage = Math.min(
@@ -142,10 +140,9 @@ export const AnimatedSVG = () => {
         SEGMENTS_COUNT - 1,
       );
       const progress = latest * SEGMENTS_COUNT - stage;
-      const currentPoints = allPoints[stage] || defaultPoints;
+      const currentPoints = allPoints[stage] ?? defaultPoints;
       const nextPoints =
-        allPoints[Math.min(stage + 1, allPoints.length - 1)] || defaultPoints;
-      setPoints(interpolatePoints(currentPoints, nextPoints, progress));
+        allPoints[Math.min(stage + 1, allPoints.length - 1)] ?? defaultPoints;
       setCurrentPathRed(
         pointsToPath(
           interpolatePoints(
@@ -169,7 +166,7 @@ export const AnimatedSVG = () => {
       );
     });
     return () => unsubscribe();
-  }, [scrollYProgress, allPoints]);
+  }, [scrollYProgress, allPoints, defaultPoints]);
 
   const handleEnterScroll = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();

@@ -1,18 +1,12 @@
-import { Fragment } from "react";
 import type { ComponentProps } from "react";
 import Markdown from "./Markdown";
-import { cn } from "@/lib/utils";
 
-export const WhitepaperContent = ({
-  className,
-  ...props
-}: Omit<ComponentProps<typeof Markdown>, "children"> & {
-  className?: string;
-}) => {
+export const WhitepaperContent = (
+  props: Omit<ComponentProps<typeof Markdown>, "children">,
+) => {
   return (
-    <div className={cn("prose dark:prose-invert", className)}>
-      <Markdown>
-        {`
+    <Markdown {...props}>
+      {`
 ## Table of Contents
 - [Abstract](#abstract)
 - [Introduction](#introduction)
@@ -282,7 +276,6 @@ Accurate and transparent execution is critical to maintain trust and align incen
   - **Oraclization**: Chainlink oracles fetch outcome data (e.g., API results, verified milestone reports) or Polymarket resolution outcomes, ensuring decentralized and tamper-resistant resolution.
   - **Execution**: The oraclized outcome determines success or failure, with payouts distributed proportionally from $$\\mathcal{D}$$ to correct predictors. Non-token predictions simplify token distribution but require robust oracle design to maintain trust.
 `}
-      </Markdown>
-    </div>
+    </Markdown>
   );
 };

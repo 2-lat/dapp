@@ -1,6 +1,6 @@
 "use client";
 
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { type Options } from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
@@ -32,7 +32,7 @@ const _mapProps = (props: ComponentProps<typeof ReactMarkdown>) =>
         <InlineMath renderError={() => null}>{value}</InlineMath>
       ),
     },
-  }) as any;
+  }) as Readonly<Options>;
 
 const Markdown = (props: ComponentProps<typeof ReactMarkdown>) => (
   <ReactMarkdown {..._mapProps(props)} />

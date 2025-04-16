@@ -7,6 +7,7 @@ import { TRPCReactProvider } from "@/trpc/react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToggleTheme } from "@/components/toggle-theme";
 import { LayoutWrapper } from "@/components/LayoutWrapper";
+import { Web3Provider } from "@/components/web3-provider";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -48,10 +49,12 @@ export default function RootLayout({
       <body>
         <TRPCReactProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <LayoutWrapper>
-              <ToggleTheme className="fixed top-4 right-4 z-20" />
-              {children}
-            </LayoutWrapper>
+            <Web3Provider>
+              <LayoutWrapper>
+                <ToggleTheme className="fixed top-4 right-4 z-20" />
+                {children}
+              </LayoutWrapper>
+            </Web3Provider>
           </ThemeProvider>
         </TRPCReactProvider>
       </body>

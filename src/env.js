@@ -23,6 +23,7 @@ export const env = createEnv({
     NEXT_PUBLIC_2LAT_PAIR_ADDRESS: z.string(),
     NEXT_PUBLIC_MOON_ADDRESS: z.string(),
     NEXT_PUBLIC_ACCESS_GATEKEEPER_ADDRESS: z.string(),
+    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: z.string(),
   },
 
   /**
@@ -36,6 +37,7 @@ export const env = createEnv({
     NEXT_PUBLIC_2LAT_PAIR_ADDRESS: process.env.NEXT_PUBLIC_2LAT_PAIR_ADDRESS,
     NEXT_PUBLIC_MOON_ADDRESS: process.env.NEXT_PUBLIC_MOON_ADDRESS,
     NEXT_PUBLIC_ACCESS_GATEKEEPER_ADDRESS: process.env.NEXT_PUBLIC_ACCESS_GATEKEEPER_ADDRESS,
+    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

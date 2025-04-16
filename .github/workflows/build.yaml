@@ -1,0 +1,102 @@
+name: Docker build
+
+on:
+    push:
+        branches:
+            - main
+            - develop
+            - supabase
+    release:
+        types:
+            - published
+
+env:
+    REGISTRY: ghcr.io
+
+jobs:
+    exclude-jobs:
+        runs-on: ubuntu-latest
+        outputs:
+            jobs: ${{ steps.exclude-jobs.outputs.jobs }}
+        steps:
+            - id: exclude-jobs
+              # 1. use any other condition(s) that fits your requirements
+              # 2. each item in the JSON array will be matched against your matrix later
+              # 3. here I exclude everything except ubuntu-latest + python3.7 (see matrix below)
+              # 4. make sure to output as single line
+              # 5. the default case is: exclude nothing
+              run: |
+                  if ${{ github.ref != 'refs/heads/main' }}; then  # 1
+                    # 2, 3
+                    echo 'jobs=[
+                      {"namespace": "production"}
+                    ]' | tr -d '[:space:]' >> $GITHUB_OUTPUT  # 4
+                  else
+                    echo 'jobs=[]' >> $GITHUB_OUTPUT  # 5
+                  fi
+
+    docker_build:
+        needs: exclude-jobs
+        strategy:
+            matrix:
+                namespace:
+                    - production
+                    - develop
+                exclude: ${{ fromJSON(needs.exclude-jobs.outputs.jobs) }}
+
+        env:
+            IMAGE_NAME: ${{ github.repository }}-${{ matrix.namespace }}
+
+        runs-on: ubuntu-latest
+
+        permissions:
+            contents: read
+            packages: write
+
+        environment:
+            name: ${{ matrix.namespace }}
+            url: https://2.lat
+
+        steps:
+            - uses: actions/checkout@v3
+            - name: Get version from package.json
+              id: package_version
+              run: echo "version=v$(jq -r .version package.json)" >> $GITHUB_OUTPUT
+
+            - name: Prepare .env file
+              run: mv .env.${{ matrix.namespace }} .env.local
+                
+
+            - name: Login to GHCR
+              if: github.event_name != 'pull_request'
+              uses: docker/login-action@v2
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Docker meta
+              id: meta
+              uses: docker/metadata-action@v4
+              with:
+                  # generate Docker tags based on the following events/attributes
+                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+                  tags: |
+                      type=ref,event=branch
+                      type=semver,pattern={{version}},value=${{ steps.package_version.outputs.version }}
+                      type=semver,pattern={{major}}.{{minor}},value=${{ steps.package_version.outputs.version }}
+                      type=semver,pattern={{major}},value=${{ steps.package_version.outputs.version }}
+                      type=sha
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v2
+
+            - name: Build, cache and push docker image
+              uses: docker/build-push-action@v3
+              with:
+                  context: .
+                  push: true
+                  tags: ${{ steps.meta.outputs.tags }}
+                  labels: ${{ steps.meta.outputs.labels }}
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max

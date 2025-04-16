@@ -1,21 +1,21 @@
 "use client";
 
 import { useMounted } from "@/hooks/useMounted";
+import { cn } from "@/lib/utils";
+import { calculateMoonPath, getCurrentMoonPhase } from "@/utils/moon";
 import { motion } from "motion/react";
 import { useTheme } from "next-themes";
-import { useEffect, useMemo, useState, type ComponentProps } from "react";
-import { calculateMoonPath, getCurrentMoonPhase } from "@/utils/moon";
-import { cn } from "@/lib/utils";
+import { useMemo, useState, type ComponentProps } from "react";
 
 export const ObserveMoon = ({
   className,
   ...props
-}: Omit<ComponentProps<typeof motion.svg>, 'ref'>) => {
+}: Omit<ComponentProps<typeof motion.svg>, "ref">) => {
   const isMounted = useMounted();
   const { resolvedTheme: theme } = useTheme();
   const isLight = theme === "light";
   const radius = 200;
-  const [time, setTime] = useState(Date.now());
+  const [time] = useState(Date.now());
   const currentAge = getCurrentMoonPhase(time);
 
   const [pathA, pathB, pathC] = useMemo(() => {
@@ -60,7 +60,9 @@ export const ObserveMoon = ({
           key={color}
           d={path}
           fill="currentColor"
-          className={cn(isLight ? "text-background" : `${color} mix-blend-screen`)}
+          className={cn(
+            isLight ? "text-background" : `${color} mix-blend-screen`,
+          )}
           strokeWidth="1"
           mask={`url(#moon-mask)`}
         />

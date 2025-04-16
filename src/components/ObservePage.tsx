@@ -9,14 +9,16 @@ import { cn } from "@/lib/utils";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/trpc/react";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export const ObservePage = () => {
-  const { data: latPrice, isLoading: priceLoading } = api.token.price.useQuery();
+  const { data: latPrice, isLoading: priceLoading } =
+    api.token.price.useQuery();
   const [scrollProgress, setScrollProgress] = useState(0);
   const [scroll, setScroll] = useState(0);
   const isMounted = useMounted();
   const { isConnected, latBalance, hasMembership } = mockWalletState;
-  const { marketCap, lockedLat, nextMoonMembers } = mockStats;
+  const { marketCap, lockedLat } = mockStats;
   const nextMoon = isMounted ? findNextNewMoon() : new Date();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -31,7 +33,10 @@ export const ObservePage = () => {
   });
 
   // Show all sections on big screens
-  const showAll = useMemo(() => scroll === 0 && scrollProgress === 1, [scroll, scrollProgress]);
+  const showAll = useMemo(
+    () => scroll === 0 && scrollProgress === 1,
+    [scroll, scrollProgress],
+  );
 
   useEffect(() => {
     const unsubscribeY = scrollY.on("change", setScroll);
@@ -40,7 +45,7 @@ export const ObservePage = () => {
       unsubscribeY();
       unsubscribeP();
     };
-  }, [scrollYProgress]);
+  }, [scrollYProgress, scrollY]);
 
   return (
     <div
@@ -49,7 +54,7 @@ export const ObservePage = () => {
     >
       {/* Stats Section */}
       <motion.div
-        className="bg-background/80 sticky top-40 w-full max-w-4xl p-2 sm:p-4 lg:p-8 backdrop-blur-sm"
+        className="bg-background/80 sticky top-40 w-full max-w-4xl p-2 backdrop-blur-sm sm:p-4 lg:p-8"
         style={{ opacity: showAll ? 1 : moonOpacity }}
       >
         <div className="grid grid-cols-2 gap-8 text-center text-sm sm:grid-cols-3 lg:grid-cols-5">
@@ -90,7 +95,7 @@ export const ObservePage = () => {
         </div>
       </motion.div>
       {/* Moon Section */}
-      <ObserveMoon className="sticky top-24 max-h-[50vh] w-full max-w-sm z-50" />
+      <ObserveMoon className="sticky top-24 z-50 max-h-[50vh] w-full max-w-sm" />
       {/* CTA Section */}
       <motion.div
         className="bg-background/80 flex w-full max-w-xl flex-col items-center gap-8 p-8 text-center backdrop-blur-sm"
@@ -116,6 +121,8 @@ export const ObservePage = () => {
             >
               Connect Wallet
             </Button>
+
+            <ConnectButton />
           </>
         )}
         {isConnected && !hasMembership && (

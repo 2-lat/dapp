@@ -3,7 +3,7 @@
 import { useMounted } from "@/hooks/useMounted";
 import { cn } from "@/lib/utils";
 import { motion, useScroll, useTransform } from "motion/react";
-import { useEffect, useRef, useState, type ComponentProps } from "react";
+import { useRef, type ComponentProps } from "react";
 
 const PageInner = ({
   children,
