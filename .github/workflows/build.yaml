@@ -46,6 +46,7 @@ jobs:
 
         env:
             IMAGE_NAME: ${{ github.repository }}-${{ matrix.namespace }}
+            DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
         runs-on: ubuntu-latest
 
@@ -65,7 +66,9 @@ jobs:
 
             - name: Prepare .env file
               run: mv .env.${{ matrix.namespace }} .env
-                
+
+            - name: Add envs to .env
+              run: echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
 
             - name: Login to GHCR
               if: github.event_name != 'pull_request'
