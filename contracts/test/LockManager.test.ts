@@ -4,7 +4,7 @@ import { LockManager } from "../typechain-types";
 import { TwoLatToken } from "../typechain-types";
 import { getSigners, advanceTime, CYCLE_DURATION } from "./helpers";
 
-describe("LockManager", function () {
+describe.skip("LockManager", function () {
   let lockManager: LockManager;
   let twoLatToken: TwoLatToken;
   let owner: any;

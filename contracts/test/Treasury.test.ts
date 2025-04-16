@@ -1,8 +1,10 @@
 import { expect } from "chai";
 import { ethers, upgrades } from "hardhat";
-import { Treasury } from "../typechain-types";
+import { Treasury, TreasuryV2Mock } from "../typechain-types";
 import { TwoLatToken } from "../typechain-types";
 import { getSigners } from "./helpers";
+import { parseEther, ZeroAddress } from "ethers";
+import { treasuryV2MockSol } from "../typechain-types/contracts/mock";
 
 describe("Treasury", function () {
   let treasury: Treasury;
@@ -19,56 +21,34 @@ describe("Treasury", function () {
 
     // Deploy 2LAT token
     const TwoLatToken = await ethers.getContractFactory("TwoLatToken");
-    twoLatToken = await TwoLatToken.deploy();
+    twoLatToken = await TwoLatToken.deploy(ZeroAddress);
 
     // Deploy Treasury
     const Treasury = await ethers.getContractFactory("Treasury");
-    treasury = await upgrades.deployProxy(Treasury, [
-      await twoLatToken.getAddress(),
-      owner.address // accessPayment
-    ]);
-
-    // Transfer some 2LAT to users
-    await twoLatToken.transfer(user1.address, ethers.parseEther("10000"));
-    await twoLatToken.transfer(user2.address, ethers.parseEther("10000"));
+    treasury = await upgrades.deployProxy(
+      Treasury,
+      [await twoLatToken.getAddress()],
+      { constructorArgs: [ZeroAddress] },
+    );
   });
 
-  describe("Deployment", function () {
-    it("Should set the correct initial values", async function () {
-      expect(await treasury.twoLatToken()).to.equal(await twoLatToken.getAddress());
-      expect(await treasury.accessPayment()).to.equal(owner.address);
-      expect(await treasury.totalFunds()).to.equal(0);
-    });
+  it("Should accept funds", async function () {
+    await twoLatToken.transfer(treasury.getAddress(), parseEther("1000"));
+    expect(await twoLatToken.balanceOf(treasury.getAddress())).to.equal(
+      parseEther("1000"),
+    );
   });
 
-  describe("Access Payment Management", function () {
-    it("Should allow owner to update access payment address", async function () {
-      await treasury.setAccessPayment(user1.address);
-      expect(await treasury.accessPayment()).to.equal(user1.address);
-    });
+  it("Should withdraw funds", async function () {
+    await twoLatToken.transfer(treasury.getAddress(), parseEther("1000"));
 
-    it("Should prevent non-owner from updating access payment address", async function () {
-      await expect(
-        treasury.connect(user1).setAccessPayment(user1.address)
-      ).to.be.revertedWithCustomError(treasury, "OwnableUnauthorizedAccount");
-    });
+    const TreasuryV2Mock = await ethers.getContractFactory("TreasuryV2Mock");
+    const treasuryV2 = await upgrades.upgradeProxy(await treasury.getAddress(), TreasuryV2Mock, {
+      constructorArgs: [ZeroAddress],
+    })
+    
+    expect(await twoLatToken.balanceOf(treasury.getAddress())).to.equal(parseEther("1000"));
+    await treasuryV2.withdraw();
+    expect(await twoLatToken.balanceOf(treasury.getAddress())).to.equal(0);
   });
-
-  describe("Cycle Funds", function () {
-    it("Should correctly track cycle funds", async function () {
-      const cycle = 1;
-      const amount = ethers.parseEther("1000");
-      
-      // Simulate receiving funds
-      await twoLatToken.transfer(await treasury.getAddress(), amount);
-      await treasury.getCycleFunds(cycle);
-      
-      expect(await treasury.getCycleFunds(cycle)).to.equal(0); // Will be updated when we implement receiveFunds
-    });
-  });
-
-  // More test cases will be added as we implement the core functions
-  // - receiveFunds
-  // - distributeFunds
-  // - calculateQuadraticFunding
-}); 
+});
