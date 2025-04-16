@@ -36,11 +36,10 @@ ENV NODE_ENV=production
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
 
-COPY --from=builder --chown=nextjs:nodejs /app/next.config.mjs ./
+COPY --from=builder --chown=nextjs:nodejs /app/next.config.js ./
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder --chown=nextjs:nodejs /app/.env ./.env
-COPY --from=builder --chown=nextjs:nodejs /app/.env.local ./.env.local
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 COPY --chown=nextjs:nodejs bin/readiness.sh ./bin/readiness.sh
