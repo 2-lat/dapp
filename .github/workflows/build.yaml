@@ -64,7 +64,7 @@ jobs:
               run: echo "version=v$(jq -r .version package.json)" >> $GITHUB_OUTPUT
 
             - name: Prepare .env file
-              run: mv .env.${{ matrix.namespace }} .env.local
+              run: mv .env.${{ matrix.namespace }} .env
                 
 
             - name: Login to GHCR
